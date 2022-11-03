@@ -1,13 +1,3 @@
-# Keeper
-# Framework for storing/retriving files from the blob, and loading these files into the database.
-library(AzureStor)
-library(AzureRMR)
-library(tools)
-library(stringr)
-library(lubridate)
-library(readr)
-library(base64enc)
-
 #' Store
 #'
 #' Stores a local file in the blob.
@@ -20,7 +10,7 @@ library(base64enc)
 store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
     message("Storing ", local_fn, " as ", blob_fn, " ...")
     cont <- get_container(container_url)
-    if (blob_exists(cont, blob_fn) & !forced) {
+    if (AzureStor::blob_exists(cont, blob_fn) & !forced) {
         l_props <- local_props(local_fn)
         b_props <- blob_props(blob_fn, cont)
         if (b_props$md5_hash == l_props$md5_hash) {
@@ -36,7 +26,7 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
         }
     }
     else {
-        upload_blob(cont, local_fn, blob_fn, put_md5 = TRUE)
+        AzureStor::upload_blob(cont, local_fn, blob_fn, put_md5 = TRUE)
     }
 }
 
@@ -68,7 +58,7 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
         }
     }
     else {
-        download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
+        AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
     }
 }
 
@@ -81,7 +71,7 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
 #' @export
 list_stored <- function(blob_starts_with, container_url) {
     cont <- get_container(container_url)
-    list_blobs(cont, prefix = blob_starts_with)
+    AzureStor::list_blobs(cont, prefix = blob_starts_with)
 }
 
 
@@ -92,7 +82,7 @@ hex2base64 <- function(hex_str) {
     hex <- sapply(seq(1, nchar(hex_str), by = 2),
                   function(x) substr(hex_str, x, x + 1))
     raw <- as.raw(strtoi(hex, 16L))
-    base64encode(raw)
+    base64enc::base64encode(raw)
 }
 
 local_props <- function (fn) {
@@ -100,34 +90,35 @@ local_props <- function (fn) {
         stop(paste0(fn, " not found!"))
     }
     props <- file.info(fn)
-    list(md5_hash = hex2base64(md5sum(fn)),
+    list(md5_hash = hex2base64(tools::md5sum(fn)),
          size = props["size"][[1]],
-         mtime = as_datetime(props["mtime"][[1]]))
+         mtime = lubridate::as_datetime(props["mtime"][[1]]))
 }
 
 blob_props <- function(blob_fn, cont) {
-    props <- get_storage_properties(cont, blob_fn)
+    props <- AzureStor::get_storage_properties(cont, blob_fn)
     list(md5_hash = props["content-md5"][[1]],
          size = props["content-length"][[1]],
-         mtime = parse_datetime(props["last-modified"][[1]], "%a, %d %b %Y %T %Z"))
+         mtime = lubridate::dmy_hms(props["last-modified"][[1]]))
 }
 
 get_container <- function(container_url) {
-    matches <- str_match_all(container_url, "(https://.*)/([^\\?]+)\\??(.+)?")[[1]]
+    matches <- stringr::str_match_all(container_url, "(https://.*)/([^\\?]+)\\??(.+)?")[[1]]
     resource <- matches[2]
     container <- matches[3]
     sas <- matches[4]
     # URL with access token included
     if (is.na(sas) == FALSE) {
         stop("Use of SAS keys not permitted! Use a plain URL and your AD id will be automatically used.")
-        # endp_key <- storage_endpoint(resource, sas = sas)
+        # endp_key <- AzureStor::storage_endpoint(resource, sas = sas)
     }
     # Use default credentials
     else {
-        token <- get_azure_token("https://storage.azure.com",
-                                 tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
-                                 app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5") # "Blob Reporting App - System Intelligence" app
-        endp_key <- storage_endpoint(resource, token = token)
+        token <-
+            AzureRMR::get_azure_token("https://storage.azure.com",
+                                      tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
+                                      app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5") # "Blob Reporting App - System Intelligence" app
+        endp_key <- AzureStor::storage_endpoint(resource, token = token)
     }
-    storage_container(endp_key, container)
+    AzureStor::storage_container(endp_key, container)
 }

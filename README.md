@@ -14,15 +14,6 @@ install_github("hud-govt-nz/hud-keep")
 
 ## Usage
 ```R
-# TODO: I really need to work out how R does run-time dependencies
-library(AzureStor)
-library(AzureRMR)
-library(tools)
-library(stringr)
-library(lubridate)
-library(readr)
-library(base64enc)
-
 library(hud.keep)
 CONTAINER_URL <- "https://sysintel.blob.core.windows.net/sandbox"
 

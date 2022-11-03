@@ -1,6 +1,6 @@
 library(devtools)
 install_github("hud-govt-nz/hud-keep")
-# install_local("./")
+# install_local("./", force = TRUE)
 library(hud.keep)
 CONTAINER_URL <- "https://sysintel.blob.core.windows.net/sandbox"
 
