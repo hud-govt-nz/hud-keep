@@ -51,7 +51,7 @@ src_blob_fn <- "regional-workforce/hlfs_20221101.xls"
 
 retrieve(src_blob_fn, src_local_fn, container_url)
 
-res_local_fn <- "data/outputs/pacifecon-developers_20221101.xls"
+res_local_fn <- "data/outputs/regional-workforce-trends_20221101.csv"
 res_blob_fn <- "regional-workforce/regional-workforce-trends_20221101.csv"
 
 read_csv(src_local_fn) %>%
