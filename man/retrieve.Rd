@@ -11,7 +11,7 @@ retrieve(blob_fn, local_fn, container_url, forced = FALSE)
 
 \item{local_fn}{Local filename}
 
-\item{container_url}{Azure container URL (e.g. "https://sysintel.blob.core.windows.net/bot-outputs")}
+\item{container_url}{Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")}
 
 \item{forced}{Overwrite local version}
 }

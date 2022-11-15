@@ -15,7 +15,7 @@ install_github("hud-govt-nz/hud-keep")
 ## Usage
 ```R
 library(hud.keep)
-CONTAINER_URL <- "https://sysintel.blob.core.windows.net/sandbox"
+CONTAINER_URL <- "https://dlreportingdataprod.blob.core.windows.net/sandbox"
 
 list_stored("RE", CONTAINER_URL)
 store("README.md", "README-blob.md", CONTAINER_URL) # Store
@@ -31,7 +31,7 @@ There are multiple containers you can put things in:
 * `secure`: For special datasets that you don't want mixed up with other datasets. Talk to Keith if you need this.
 * `sandbox`: For messing about. This will be wiped clean periodically.
 
-To use any of these containers, use `https://sysintel.blob.core.windows.net/sandbox` etc as the URL.
+To use any of these containers, use `https://dlreportingdataprod.blob.core.windows.net/sandbox` etc as the URL.
 
 You should also add a subfolder for the filename, in the form of: `[PROJECT]/[PROJECT]_[YYYYMMDD].[EXTENSION]`. We double-bag the project name so that when it is downloaded, you don't get a random `20220915.csv` file in your download folder. You can also add additional folder layers if you want.
 
@@ -39,7 +39,7 @@ Putting it all together:
 ```R
 library(tidyverse)
 library(hud.keep)
-container_url <- "https://sysintel.blob.core.windows.net/analysis"
+container_url <- "https://dlreportingdataprod.blob.core.windows.net/analysis"
 
 src_local_fn <- "data/source/hlfs_20221101.xls"
 src_blob_fn <- "regional-workforce/hlfs_20221101.xls"

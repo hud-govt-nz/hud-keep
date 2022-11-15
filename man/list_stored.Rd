@@ -9,7 +9,7 @@ list_stored(blob_starts_with, container_url)
 \arguments{
 \item{blob_starts_with}{Path or prefix to look for}
 
-\item{container_url}{Azure container URL (e.g. "https://sysintel.blob.core.windows.net/bot-outputs")}
+\item{container_url}{Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")}
 }
 \description{
 List all the files stored in the blob.

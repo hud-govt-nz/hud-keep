@@ -4,7 +4,7 @@
 #' @name store
 #' @param local_fn Local filename
 #' @param blob_fn Blob filename (including path)
-#' @param container_url Azure container URL (e.g. "https://sysintel.blob.core.windows.net/bot-outputs")
+#' @param container_url Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")
 #' @param forced Overwrite blob version
 #' @export
 store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
@@ -36,7 +36,7 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
 #' @name retrieve
 #' @param blob_fn Blob filename (including path)
 #' @param local_fn Local filename
-#' @param container_url Azure container URL (e.g. "https://sysintel.blob.core.windows.net/bot-outputs")
+#' @param container_url Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")
 #' @param forced Overwrite local version
 #' @export
 retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
@@ -67,7 +67,7 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
 #' List all the files stored in the blob.
 #' @name list_stored
 #' @param blob_starts_with Path or prefix to look for
-#' @param container_url Azure container URL (e.g. "https://sysintel.blob.core.windows.net/bot-outputs")
+#' @param container_url Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")
 #' @export
 list_stored <- function(blob_starts_with, container_url) {
     cont <- get_container(container_url)

@@ -1,7 +1,7 @@
 # Direct tests of the library, for development purposes
 library(AzureStor)
 library(AzureRMR)
-resource <- "https://sysintel.blob.core.windows.net"
+resource <- "https://dlreportingdataprod.blob.core.windows.net"
 
 # METHOD 1: Use the "Blob Reporting App - System Intelligence" app key
 token <- get_azure_token("https://storage.azure.com",
