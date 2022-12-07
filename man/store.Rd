@@ -11,7 +11,7 @@ store(local_fn, blob_fn, container_url, forced = FALSE)
 
 \item{blob_fn}{Blob filename (including path)}
 
-\item{container_url}{Azure container URL (e.g. "https://dlreportingdataprod.blob.core.windows.net/bot-outputs")}
+\item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
 \item{forced}{Overwrite blob version}
 }

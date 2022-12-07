@@ -18,7 +18,7 @@ pipenv install -e ~/hud-keep
 ## Usage
 ```python
 import hudkeep
-CONTAINER_URL = "https://dlreportingdataprod.blob.core.windows.net/sandbox"
+CONTAINER_URL = "https://dlprojectsdataprod.blob.core.windows.net/sandbox"
 
 list_stored("RE", CONTAINER_URL)
 store("README.md", "README-blob.md", CONTAINER_URL) # Store

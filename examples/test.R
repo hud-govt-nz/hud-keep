@@ -2,7 +2,7 @@ library(devtools)
 install_github("hud-govt-nz/hud-keep")
 # install_local("./", force = TRUE)
 library(hud.keep)
-CONTAINER_URL <- "https://dlreportingdataprod.blob.core.windows.net/sandbox"
+CONTAINER_URL <- "https://dlprojectsdataprod.blob.core.windows.net/sandbox"
 
 list_stored("RE", CONTAINER_URL)
 store("README.md", "README-blob.md", CONTAINER_URL) # Store
