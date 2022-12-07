@@ -23,7 +23,14 @@ store("examples/manual-methods.R", "test.R", CONTAINER_URL) # Overwrite - won't 
 store("examples/manual-methods.R", "test.R", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
 retrieve("test.R", "local-test.R", CONTAINER_URL) # Download - is local-test.R the same as examples/test.R or examples/manual-methods.R?
 
+# Read an existing file from the blob...
+retrieve("test.csv", "test-local.csv", CONTAINER_URL)
+x <- read_csv("test-local.csv")
+file.remove("test-local.csv") # For larger files, you might want to keep the local version to avoid having to download every time
+
+# Or use the convenience function, which does all the above
 x <- read_blob("test.csv", CONTAINER_URL)
+
 ```
 
 ## Where should I put things?
