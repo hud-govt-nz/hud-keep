@@ -22,6 +22,7 @@ store("README.md", "README-blob.md", CONTAINER_URL) # Store
 store("R/keeper.R", "README-blob.md", CONTAINER_URL) # Overwrite - won't work, because the hashes don't match
 store("R/keeper.R", "README-blob.md", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
 retrieve("README-blob.md", "test-local.R", CONTAINER_URL)
+x <- read_blob("test.csv", CONTAINER_URL)
 ```
 
 ## Where should I put things?
@@ -57,7 +58,7 @@ res_blob_fn <- "regional-workforce/regional-workforce-trends_20221101.csv"
 read_csv(src_local_fn) %>%
   mutate(blah = "blah") %>%
   write_csv(res_local_fn)
-  
+
 store(res_local_fn, res_blob_fn, container_url)
 
 # See whether new file is there

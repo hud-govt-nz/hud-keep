@@ -62,6 +62,31 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
     }
 }
 
+#' Read blob
+#'
+#' Read a CSV/Excel file from the blob
+#' @name read_blob
+#' @param blob_fn Blob filename (including path)
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param sheet Sheet name (for Excel)
+#' @export
+read_blob <- function(blob_fn, container_url, sheet = NULL) {
+    local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
+    extension <- stringr::str_extract(local_fn, "\\.\\w+$")
+    retrieve(blob_fn, local_fn, container_url)
+    if (extension == ".csv") {
+        out <- read.csv(local_fn)
+    }
+    else if (extension == ".xls" || extension == ".xlsx") {
+        out <- readxl::read_excel(local_fn, sheet = sheet)
+    }
+    else {
+        stop("I don't know how to read '", extension, "' files!")
+    }
+    file.remove(local_fn)
+    out
+}
+
 #' List stored
 #'
 #' List all the files stored in the blob.
