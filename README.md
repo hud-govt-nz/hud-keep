@@ -17,11 +17,12 @@ install_github("hud-govt-nz/hud-keep")
 library(hud.keep)
 CONTAINER_URL <- "https://dlprojectsdataprod.blob.core.windows.net/sandbox"
 
-list_stored("RE", CONTAINER_URL)
-store("README.md", "README-blob.md", CONTAINER_URL) # Store
-store("R/keeper.R", "README-blob.md", CONTAINER_URL) # Overwrite - won't work, because the hashes don't match
-store("R/keeper.R", "README-blob.md", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
-retrieve("README-blob.md", "test-local.R", CONTAINER_URL)
+list_stored("", CONTAINER_URL)
+store("examples/test.R", "test.R", CONTAINER_URL) # Store
+store("examples/manual-methods.R", "test.R", CONTAINER_URL) # Overwrite - won't work, because the hashes don't match
+store("examples/manual-methods.R", "test.R", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
+retrieve("test.R", "local-test.R", CONTAINER_URL) # Download - is local-test.R the same as examples/test.R or examples/manual-methods.R?
+
 x <- read_blob("test.csv", CONTAINER_URL)
 ```
 
