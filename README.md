@@ -35,7 +35,7 @@ x <- read_blob("test.csv", CONTAINER_URL)
 
 ## Where should I put things?
 There are multiple containers you can put things in:
-* `analysis`: **This is what you should probably use.** For data that is created as part of an analysis.
+* `projects`: **This is what you should probably use.** For data that is created as part of an analysis.
 * `bot-outputs`: For data that is created from an automated process.
 * `secure`: For special datasets that you don't want mixed up with other datasets. Talk to Keith if you need this.
 * `sandbox`: For messing about. This will be wiped clean periodically.
@@ -47,30 +47,38 @@ You should also add a subfolder for the filename, in the form of: `[PROJECT]/[PR
 Putting it all together:
 ```R
 library(tidyverse)
+library(readxl)
 library(hud.keep)
-container_url <- "https://dlprojectsdataprod.blob.core.windows.net/analysis"
+container_url <- "https://dlprojectsdataprod.blob.core.windows.net/projects"
 
 src_local_fn <- "data/source/hlfs_20221101.xls"
 src_blob_fn <- "regional-workforce/hlfs_20221101.xls"
 
-# Leave this code to show how the file was originally retrieved
-# # Download file
+# # Download file - leave this code to show how the file was originally retrieved
 # download.file("http://stats.govt.nz/blahblah.xls", src_local_fn)
 # store(src_local_fn, src_blob_fn, container_url)
 
-retrieve(src_blob_fn, src_local_fn, container_url)
+# Option 1: Read the file directly, read_blob can handle CSV and Excel (you'll need to name the sheet)
+hlfs <- read_blob(src_blob_fn, CONTAINER_URL, sheet = "Sheet1")
 
+# Option 2: Save the file locally, then read
+# You might want this for larger file that you don't want to repeatedly download, or if the reading is not straightforward
+retrieve(src_blob_fn, src_local_fn, container_url)
+hlfs <- read_excel(src_local_fn, sheet = "Sheet1")
+
+# Do analysis
+report <-
+    hlfs %>%
+    mutate(blah = "blah")
+
+# Save output to the blob as well
 res_local_fn <- "data/outputs/regional-workforce-trends_20221101.csv"
 res_blob_fn <- "regional-workforce/regional-workforce-trends_20221101.csv"
-
-read_csv(src_local_fn) %>%
-  mutate(blah = "blah") %>%
-  write_csv(res_local_fn)
-
+write_csv(report, res_local_fn)
 store(res_local_fn, res_blob_fn, container_url)
 
 # See whether new file is there
-list_stored("regional-workforce", container_url)
+list_stored("regional-", container_url)
 ```
 
 You might want to [https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files?platform=windows](ignore the data files) so these are not stored with your code.
