@@ -127,6 +127,8 @@ blob_props <- function(blob_fn, cont) {
          mtime = lubridate::dmy_hms(props["last-modified"][[1]]))
 }
 
+# CAUTION: Don't use this for automated tasks, as the AzureRMR authentication
+# flow requires manual intervention.
 get_container <- function(container_url) {
     matches <- stringr::str_match_all(container_url, "(https://.*)/([^\\?]+)\\??(.+)?")[[1]]
     resource <- matches[2]
@@ -137,7 +139,17 @@ get_container <- function(container_url) {
         stop("Use of SAS keys not permitted! Use a plain URL and your AD id will be automatically used.")
         # endp_key <- AzureStor::storage_endpoint(resource, sas = sas)
     }
-    # Use default credentials
+    # We're on the cloud!
+    # Use "device_code" auth_flow, which requires manual copy/paste
+    else if (Sys.info()["login"] == "azureuser") {
+        token <-
+            AzureRMR::get_azure_token("https://storage.azure.com",
+                                      tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
+                                      app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5",
+                                      auth_type = "device_code") # "Blob Reporting App - System Intelligence" app
+        endp_key <- AzureStor::storage_endpoint(resource, token = token)
+    }
+    # Use default credentials when running locally
     else {
         token <-
             AzureRMR::get_azure_token("https://storage.azure.com",
