@@ -13,7 +13,7 @@ from azure.storage.blob import ContainerClient, ContentSettings
 #===========#
 # Stores a local file in the blob
 def store(local_fn, blob_fn, container_url, forced = False):
-    print(f"Storing {local_fn} as {blob_fn}...")
+    print(f"Storing '{local_fn}' as '{blob_fn}'...")
     blob = get_blob_client(blob_fn, container_url)
     local = Path(local_fn)
     l_md5, l_size, l_mtime = local_props(local_fn)
@@ -21,15 +21,15 @@ def store(local_fn, blob_fn, container_url, forced = False):
         # Need to do our own md5_hashing as the automatic blob hashing can't handle large files
         b_md5, b_size, b_mtime = blob_props(blob_fn, container_url)
         if b_md5 == l_md5:
-            print("File is already stored and the blob hash matches the local file.")
+            print(f"File with matching hash was already stored on {b_mtime}.")
         else:
             raise Exception(
-                f"Local file ({l_size} bytes, last modified {l_mtime}) doesn't match "
-                f"blob file ({b_size} bytes, last modified {b_mtime})!\n"
+                f"Local file '{local_fn}' ({l_size} bytes, last modified {l_mtime}) doesn't match "
+                f"blob file '{blob_fn}' ({b_size} bytes, last modified {b_mtime})!\n"
                 f"Use 'forced=True' to overwrite."
             )
     else:
-        return blob.upload_blob(
+        blob.upload_blob(
             local.open("rb"),
             overwrite = True,
             content_settings = ContentSettings(
@@ -37,10 +37,11 @@ def store(local_fn, blob_fn, container_url, forced = False):
                 content_md5 = l_md5
             )
         )
+        return True
 
 # Retrives a file from the blob and save it locally
 def retrieve(local_fn, blob_fn, container_url, forced = False):
-    print(f"Retrieving {local_fn} from {blob_fn}...")
+    print(f"Retrieving '{local_fn}' from '{blob_fn}'...")
     blob = get_blob_client(blob_fn, container_url)
     local = Path(local_fn)
     if local.exists() and not forced:
@@ -50,13 +51,14 @@ def retrieve(local_fn, blob_fn, container_url, forced = False):
             print("Local file already exists and matches the blob hash.")
         else:
             raise Exception(
-                f"Local file ({l_size} bytes, last modified {l_mtime}) doesn't match "
-                f"blob file ({b_size} bytes, last modified {b_mtime})!\n"
+                f"Local file '{local_fn}' ({l_size} bytes, last modified {l_mtime}) doesn't match "
+                f"blob file '{blob_fn}' ({b_size} bytes, last modified {b_mtime})!\n"
                 f"Use 'forced=True' to overwrite."
             )
     else:
         blob_data = blob.download_blob()
         blob_data.readinto(local.open("wb"))
+        return True
 
 # List files stored on the blob
 def list_stored(blobs_starts_with, container_url):
