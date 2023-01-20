@@ -99,6 +99,30 @@ list_stored <- function(blob_starts_with, container_url) {
     AzureStor::list_blobs(cont, prefix = blob_starts_with)
 }
 
+#' Find latest
+#'
+#' Finds the latest version of a file stored on the blob. The last file,
+#' sorted by full blob name, is considered the latest.
+#'
+#' e.g.:
+#'
+#'   "hmu-bot/hmu-bot-20230115/Construction/ea-icp-grab.csv"
+#'   "hmu-bot/hmu-bot-20230117/Construction/ea-icp-grab.csv"
+#'   "hmu-bot/hmu-bot-20230120/Construction/ea-icp-grab.csv" <- Latest
+#'
+#' @name find_latest
+#' @param blob_pattern Pattern to match for (e.g. "ea-icp-grab.csv")
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param prefix_filter Prefix to filter result (e.g. "hmu-bot/hmu-bot-")
+#' @export
+find_latest <- function(blob_pattern, container_url, prefix_filter = NULL) {
+    cont <- get_container(container_url)
+    files <- AzureStor::list_blobs(cont, prefix = prefix_filter, info = "name") # Using a prefix_filter will speed things up
+    matches <- files[grepl(blob_pattern, files)]
+    latest <- sort(matches)[-1]
+    latest
+}
+
 
 #===============#
 #   Utilities   #
