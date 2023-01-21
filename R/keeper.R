@@ -119,7 +119,8 @@ find_latest <- function(blob_pattern, container_url, prefix_filter = NULL) {
     cont <- get_container(container_url)
     files <- AzureStor::list_blobs(cont, prefix = prefix_filter, info = "name") # Using a prefix_filter will speed things up
     matches <- files[grepl(blob_pattern, files)]
-    latest <- sort(matches)[-1]
+    if (length(matches) == 0) stop("No matches for '", blob_pattern, "' in '", container_url, "/", prefix_filter, "'!")
+    latest <- tail(sort(matches), 1)
     latest
 }
 
