@@ -166,7 +166,7 @@ get_container <- function(container_url) {
     }
     # We're on the cloud!
     # Use "device_code" auth_flow, which requires manual copy/paste
-    else if (Sys.info()["login"] == "azureuser") {
+    else if (grepl("azure", Sys.info()["release"])) {
         token <-
             AzureRMR::get_azure_token("https://storage.azure.com",
                                       tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
