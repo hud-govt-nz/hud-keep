@@ -45,7 +45,11 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
     if (file.exists(local_fn) & !forced) {
         l_props <- local_props(local_fn)
         b_props <- blob_props(blob_fn, cont)
-        if (b_props$md5_hash == l_props$md5_hash) {
+        if (is.null(b_props$md5_hash)) {
+            message("Blob does not have a hash, no check possible.")
+            AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
+        }
+        else if (b_props$md5_hash == l_props$md5_hash) {
             message("Local file already exists and matches the blob hash.")
         }
         else {
