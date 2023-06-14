@@ -72,13 +72,16 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
 #' @export
 read_blob <- function(blob_fn, container_url, sheet = NULL) {
     local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
-    extension <- stringr::str_extract(local_fn, "\\.\\w+$")
+    extension <- stringr::str_extract(local_fn, "\\.\\w+$") %>% tolower()
     retrieve(blob_fn, local_fn, container_url)
     if (extension == ".csv") {
         out <- read.csv(local_fn)
     }
     else if (extension == ".xls" || extension == ".xlsx") {
         out <- readxl::read_excel(local_fn, sheet = sheet)
+    }
+    else if (extension == ".rds") {
+        out <- read_rds(local_fn)
     }
     else {
         stop("I don't know how to read '", extension, "' files!")
