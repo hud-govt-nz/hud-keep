@@ -27,6 +27,7 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
     }
     else {
         AzureStor::upload_blob(cont, local_fn, blob_fn, put_md5 = TRUE)
+        return(local_fn)
     }
 }
 
@@ -63,6 +64,7 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
     }
     else {
         AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
+        return(local_fn)
     }
 }
 
