@@ -87,6 +87,9 @@ read_blob <- function(blob_fn, container_url, sheet = NULL) {
     else if (extension == ".rds") {
         out <- read_rds(local_fn)
     }
+    else if (extension == ".png") {
+        out <- png::readPNG(local_fn)
+    }
     else {
         stop("I don't know how to read '", extension, "' files!")
     }
