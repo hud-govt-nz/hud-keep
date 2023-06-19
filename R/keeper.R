@@ -68,35 +68,57 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
     }
 }
 
-#' Read blob
+#' Read blob file using custom function
+#'
+#' Read a file from the blob using custom function
+#' @name read_blob_using
+#' @param blob_fn Blob filename (including path)
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param f Custom function
+#' @export
+read_blob_using <- function(blob_fn, container_url, f, ...) {
+    local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
+    retrieve(blob_fn, local_fn, container_url)
+    out <- f(local_fn, ...)
+    file.remove(local_fn)
+    out
+}
+
+#' Read blob data file
 #'
 #' Read a CSV/Excel file from the blob
 #' @name read_blob
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param sheet Sheet name (for Excel)
 #' @export
-read_blob <- function(blob_fn, container_url, sheet = NULL) {
-    local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
-    extension <- stringr::str_extract(local_fn, "\\.\\w+$") %>% tolower()
-    retrieve(blob_fn, local_fn, container_url)
+read_blob_data <- function(blob_fn, container_url, ...) {
+    extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
     if (extension == ".csv") {
-        out <- read.csv(local_fn)
+        f <- read.csv
     }
     else if (extension == ".xls" || extension == ".xlsx") {
-        out <- readxl::read_excel(local_fn, sheet = sheet)
+        f <- readxl::read_excel
     }
     else if (extension == ".rds") {
-        out <- read_rds(local_fn)
-    }
-    else if (extension == ".png") {
-        out <- png::readPNG(local_fn)
+        f <- read_rds
     }
     else {
         stop("I don't know how to read '", extension, "' files!")
     }
-    file.remove(local_fn)
-    out
+    read_blob_using(blob_fn, container_url, f, ...)
+}
+
+#' DEPRECATED - Read blob data file
+#'
+#' DEPRECATED - Read a CSV/Excel file from the blob
+#' @name read_blob
+#' @param blob_fn Blob filename (including path)
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param sheet Sheet name for Excel
+#' @export
+read_blob <- function(blob_fn, container_url, sheet = NULL) {
+    warning("DEPRECATED - use read_blob_data() instead.")
+    read_blob_data(blob_fn, container_url, sheet)
 }
 
 #' List stored

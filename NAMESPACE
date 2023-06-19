@@ -3,5 +3,7 @@
 export(find_latest)
 export(list_stored)
 export(read_blob)
+export(read_blob_data)
+export(read_blob_using)
 export(retrieve)
 export(store)
