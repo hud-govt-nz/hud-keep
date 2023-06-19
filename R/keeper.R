@@ -116,7 +116,7 @@ read_blob_data <- function(blob_fn, container_url, ...) {
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
 #' @param sheet Sheet name for Excel
 #' @export
-read_blob <- function(blob_fn, container_url, sheet = NULL) {
+read_blob <- function(blob_fn, container_url, sheet = NULL, ...) {
     warning("DEPRECATED - use read_blob_data() instead.")
     extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
     if (extension == ".csv") {
