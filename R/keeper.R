@@ -118,7 +118,19 @@ read_blob_data <- function(blob_fn, container_url, ...) {
 #' @export
 read_blob <- function(blob_fn, container_url, sheet = NULL) {
     warning("DEPRECATED - use read_blob_data() instead.")
-    read_blob_data(blob_fn, container_url, sheet)
+    extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
+    if (extension == ".csv") {
+        read_blob_using(blob_fn, container_url, read.csv, ...)
+    }
+    else if (extension == ".xls" || extension == ".xlsx") {
+        read_blob_using(blob_fn, container_url, readxl::read_excel, sheet = sheet, ...)
+    }
+    else if (extension == ".rds") {
+        read_blob_using(blob_fn, container_url, read_rds, ...)
+    }
+    else {
+        stop("I don't know how to read '", extension, "' files!")
+    }
 }
 
 #' List stored
