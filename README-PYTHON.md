@@ -5,14 +5,14 @@
 Framework and tools for managing the process of storing and retriving files from the cloud, and doing hash checks on each of those processes. Python version of the tools are also included in this library.
 
 ## Installation
-Clone the repo then `pip install -e` to the local path. The `-e` will keep the file editable.
+Install directly from Github. The `-e` will keep the file editable.
 
 ```
-pip install -e ~/hud-keep
+pip install -e git+https://github.com/hud-govt-nz/hud-keep.git@main#egg=hudkeep
 ```
 OR:
 ```
-pipenv install -e ~/hud-keep
+pipenv install -e git+https://github.com/hud-govt-nz/hud-keep.git@main#egg=hudkeep
 ```
 
 ## Usage
