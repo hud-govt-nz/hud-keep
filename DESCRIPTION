@@ -17,4 +17,5 @@ Imports:
   lubridate,
   AzureStor,
   AzureRMR,
-  base64enc
+  base64enc,
+  httpuv
