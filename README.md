@@ -33,6 +33,13 @@ x <- read_blob("test.csv", CONTAINER_URL)
 
 ```
 
+### `error reading from connection`
+If you get `Error in readRDS(tokenfile): error reading from connection`, try clearing the tokens:
+```
+AzureRMR::clean_token_directory()
+```
+
+
 ## Where should I put things?
 There are multiple containers you can put things in:
 * `projects`: **This is what you should probably use.** For data that is created as part of an analysis.
