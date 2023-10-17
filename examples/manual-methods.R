@@ -1,6 +1,6 @@
 # Direct tests of the library, for development purposes
 library(AzureStor)
-library(AzureRMR)
+library(AzureAuth)
 resource <- "https://dlprojectsdataprod.blob.core.windows.net"
 
 # METHOD 1: Use the "Blob Reporting App - System Intelligence" app key

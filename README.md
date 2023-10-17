@@ -1,42 +1,52 @@
-# HUD keeper framework
+# HUD Keeper Tools
 **CAUTION: This repo is public. Do not include sensitive data or key materials.**
 **SERIOUSLY: Be careful with this one. There are a lot of authentication protocols, do not include keys in them.**
 
-Framework and tools for managing the process of storing and retriving files from the cloud, and doing hash checks on each of those processes.
+Tools for managing the process of storing and retriving files from the blob, and connecting to the database.
 
 ## Installation
 You'll need `devtools::install_github` to install the package:
 ```R
-library(devtools)
-install_github("hud-govt-nz/hud-keep")
+devtools::install_github("hud-govt-nz/hud-keep")
 ```
 
 
 ## Usage
+### Blob
 ```R
-library(hud.keep)
 CONTAINER_URL <- "https://dlprojectsdataprod.blob.core.windows.net/sandbox"
 
-list_stored("", CONTAINER_URL)
-store("examples/test.R", "test.R", CONTAINER_URL) # Store
-store("examples/manual-methods.R", "test.R", CONTAINER_URL) # Overwrite - won't work, because the hashes don't match
-store("examples/manual-methods.R", "test.R", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
-retrieve("test.R", "local-test.R", CONTAINER_URL) # Download - is local-test.R the same as examples/test.R or examples/manual-methods.R?
+hud.keep::list_stored("", CONTAINER_URL)
+hud.keep::store("examples/test.R", "test.R", CONTAINER_URL) # Store
+hud.keep::store("examples/manual-methods.R", "test.R", CONTAINER_URL) # Overwrite - won't work, because the hashes don't match
+hud.keep::store("examples/manual-methods.R", "test.R", CONTAINER_URL, forced = TRUE) # Overwrite - will work, because of the forced flag
+hud.keep::retrieve("test.R", "local-test.R", CONTAINER_URL) # Download - is local-test.R the same as examples/test.R or examples/manual-methods.R?
 
 # Read an existing file from the blob...
-retrieve("test.csv", "test-local.csv", CONTAINER_URL)
+hud.keep::retrieve("test.csv", "test-local.csv", CONTAINER_URL)
 x <- read_csv("test-local.csv")
 file.remove("test-local.csv") # For larger files, you might want to keep the local version to avoid having to download every time
 
 # Or use the convenience function, which does all the above
-x <- read_blob("test.csv", CONTAINER_URL)
+x <- hud.keep::read_blob("test.csv", CONTAINER_URL)
+```
 
+### Database
+```R
+conn <- hud.keep::db_connect("property")
+DBI::dbGetQuery(conn, "SELECT TOP(10) * FROM [Source].[DVR_Property]")
 ```
 
 ### `error reading from connection`
 If you get `Error in readRDS(tokenfile): error reading from connection`, try clearing the tokens:
+```R
+AzureAuth::clean_token_directory()
 ```
-AzureRMR::clean_token_directory()
+
+### It's not storing my tokens!
+If the tokens are not being stored (i.e. You have to reauthenticate every time), you might need to create the login folder (where the tokens are stored) manually. This is probably only relevant if you're running non-interactive process (e.g. Running a script from the commandline) as the interactive sessions would do this automatically.
+```R
+AzureAuth::create_azure_login()
 ```
 
 

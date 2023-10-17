@@ -171,6 +171,42 @@ find_latest <- function(blob_pattern, container_url, prefix_filter = NULL) {
 }
 
 
+#' Connect to a HUD database
+#'
+#' Handles all the Active Directory authentication and connects to database.
+#' @name db_connect
+#' @param database
+#' @param server
+#' @param driver
+#' @export
+db_connect <- function(database,
+                       server = "property.database.windows.net",
+                       driver = "{ODBC Driver 18 for SQL Server}") {
+
+    # Use "device_code" on the cloud because we can't hook up to a browser
+    if (grepl("azure", Sys.info()["release"])) {
+        auth_type <- "device_code"
+    } else {
+        auth_type <- NULL
+    }
+
+    token <-
+        AzureAuth::get_azure_token(
+            resource = "https://database.windows.net",
+            tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
+            app = "04b07795-8ddb-461a-bbee-02f9e1bf7b46", # "Offline Access" app
+            auth_type = auth_type)
+
+    message("Connecting to '", database, "' on '", server ,"'...")
+    DBI::dbConnect(
+        odbc::odbc(),
+        Database = database,
+        Server = server,
+        Driver = driver,
+        attributes = list("azure_token" = token$credentials$access_token))
+}
+
+
 #===============#
 #   Utilities   #
 #===============#
@@ -198,8 +234,6 @@ blob_props <- function(blob_fn, cont) {
          mtime = lubridate::dmy_hms(props["last-modified"][[1]]))
 }
 
-# CAUTION: Don't use this for automated tasks, as the AzureRMR authentication
-# flow requires manual intervention.
 get_container <- function(container_url) {
     matches <- stringr::str_match_all(container_url, "(https://.*)/([^\\?]+)\\??(.+)?")[[1]]
     resource <- matches[2]
@@ -210,23 +244,21 @@ get_container <- function(container_url) {
         stop("Use of SAS keys not permitted! Use a plain URL and your AD id will be automatically used.")
         # endp_key <- AzureStor::storage_endpoint(resource, sas = sas)
     }
-    # We're on the cloud!
-    # Use "device_code" auth_flow, which requires manual copy/paste
-    else if (grepl("azure", Sys.info()["release"])) {
-        token <-
-            AzureRMR::get_azure_token("https://storage.azure.com",
-                                      tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
-                                      app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5",
-                                      auth_type = "device_code") # "Blob Reporting App - System Intelligence" app
-        endp_key <- AzureStor::storage_endpoint(resource, token = token)
+
+    # Use "device_code" on the cloud because we can't hook up to a browser
+    if (grepl("azure", Sys.info()["release"])) {
+        auth_type <- "device_code"
+    } else {
+        auth_type <- NULL
     }
-    # Use default credentials when running locally
-    else {
-        token <-
-            AzureRMR::get_azure_token("https://storage.azure.com",
-                                      tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
-                                      app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5") # "Blob Reporting App - System Intelligence" app
-        endp_key <- AzureStor::storage_endpoint(resource, token = token)
-    }
+
+    token <-
+        AzureAuth::get_azure_token(
+            resource = "https://storage.azure.com",
+            tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
+            app = "c6c4300b-9ff3-4946-8f30-e0aa59bdeaf5", # "Blob Reporting App - System Intelligence" app
+            auth_type = auth_type)
+
+    endp_key <- AzureStor::storage_endpoint(resource, token = token)
     AzureStor::storage_container(endp_key, container)
 }

@@ -16,6 +16,7 @@ Imports:
   readxl,
   lubridate,
   AzureStor,
-  AzureRMR,
+  AzureAuth,
   base64enc,
-  httpuv
+  httpuv,
+  DBI
