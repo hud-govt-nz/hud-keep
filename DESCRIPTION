@@ -1,6 +1,6 @@
 Package: hud.keep
 Title: HUD store/retrieve functions
-Version: 0.0.0.9000
+Version: 1.0.0.0000
 Authors@R:
     person("Keith", "Ng", , "keith.ng@hud.govt.nz", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
