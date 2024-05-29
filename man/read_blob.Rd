@@ -7,7 +7,7 @@
 \usage{
 read_blob_data(blob_fn, container_url, ...)
 
-read_blob(blob_fn, container_url, sheet = NULL)
+read_blob(blob_fn, container_url, sheet = NULL, ...)
 }
 \arguments{
 \item{blob_fn}{Blob filename (including path)}

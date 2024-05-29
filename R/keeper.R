@@ -175,11 +175,11 @@ find_latest <- function(blob_pattern, container_url, prefix_filter = NULL) {
 #'
 #' Handles all the Active Directory authentication and connects to database.
 #' @name db_connect
-#' @param database
-#' @param server
-#' @param driver
+#' @param database Database name (optional)
+#' @param server Server name (optional)
+#' @param driver Driver string (optional)
 #' @export
-db_connect <- function(database,
+db_connect <- function(database = "property",
                        server = "property.database.windows.net",
                        driver = "{ODBC Driver 18 for SQL Server}") {
 
@@ -204,6 +204,48 @@ db_connect <- function(database,
         Server = server,
         Driver = driver,
         attributes = list("azure_token" = token$credentials$access_token))
+}
+
+
+#' Write to table in batches
+#'
+#' For dealing with very large tables that will fail if we try to write all at
+#' once.
+#' @name batch_write_table
+#' @param targ_df Data to write to table
+#' @param table_name Table to write to
+#' @param database Database name (optional)
+#' @param server Server name (optional)
+#' @param driver Driver string (optional)
+#' @param batch_size Number of rows to load in each batch
+#' @export
+batch_write_table <- function(targ_df,
+                              table_name,
+                              database = "property",
+                              server = "property.database.windows.net",
+                              driver = "{ODBC Driver 18 for SQL Server}",
+                              batch_size = 100000) {
+    message(str_glue("Writing {nrow(targ_df)} rows to {table_name}..."))
+    conn <- db_connect(database, server, driver)
+  
+    # Load data in batches
+    for (i in seq(1, nrow(targ_df), batch_size)) {
+        j <- min(i - 1 + batch_size, nrow(targ_df)) %>% as.integer()
+        message(str_glue("Writing rows {i} to {j}..."))
+        if (i == 1) {
+            DBI::dbWriteTable(conn, table_name, targ_df[i:j,], overwrite = TRUE)
+        } else {
+            DBI::dbWriteTable(conn, table_name, targ_df[i:j,], append = TRUE)
+        }
+    }
+
+    # Check that the whole table is loaded
+    db_count <- DBI::dbGetQuery(conn, str_glue("SELECT COUNT(*) FROM {table_name}"))
+    if (db_count == nrow(targ_df)) {
+        message(str_glue("{db_count} rows written to {table_name}."))
+    } else {
+        stop(str_glue("{nrow(targ_df)} rows expected, but there are {db_count} rows in {table_name}!"))
+    }
 }
 
 
