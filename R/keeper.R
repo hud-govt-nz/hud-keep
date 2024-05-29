@@ -225,13 +225,13 @@ batch_write_table <- function(targ_df,
                               server = "property.database.windows.net",
                               driver = "{ODBC Driver 18 for SQL Server}",
                               batch_size = 100000) {
-    message(str_glue("Writing {nrow(targ_df)} rows to {table_name}..."))
+    message(stringr::str_glue("Writing {nrow(targ_df)} rows to {table_name}..."))
     conn <- db_connect(database, server, driver)
   
     # Load data in batches
     for (i in seq(1, nrow(targ_df), batch_size)) {
         j <- min(i - 1 + batch_size, nrow(targ_df)) %>% as.integer()
-        message(str_glue("Writing rows {i} to {j}..."))
+        message(stringr::str_glue("Writing rows {i} to {j}..."))
         if (i == 1) {
             DBI::dbWriteTable(conn, table_name, targ_df[i:j,], overwrite = TRUE)
         } else {
@@ -240,11 +240,11 @@ batch_write_table <- function(targ_df,
     }
 
     # Check that the whole table is loaded
-    db_count <- DBI::dbGetQuery(conn, str_glue("SELECT COUNT(*) FROM {table_name}"))
+    db_count <- DBI::dbGetQuery(conn, stringr::str_glue("SELECT COUNT(*) FROM {table_name}"))
     if (db_count == nrow(targ_df)) {
-        message(str_glue("{db_count} rows written to {table_name}."))
+        message(stringr::str_glue("{db_count} rows written to {table_name}."))
     } else {
-        stop(str_glue("{nrow(targ_df)} rows expected, but there are {db_count} rows in {table_name}!"))
+        stop(stringr::str_glue("{nrow(targ_df)} rows expected, but there are {db_count} rows in {table_name}!"))
     }
 }
 
