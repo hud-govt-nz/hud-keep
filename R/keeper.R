@@ -75,10 +75,11 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
 #' @param f Custom function
+#' @param forced Overwrite local version
 #' @export
-read_blob_using <- function(blob_fn, container_url, f, ...) {
+read_blob_using <- function(blob_fn, container_url, f, forced = FALSE, ...) {
     local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
-    retrieve(blob_fn, local_fn, container_url)
+    retrieve(blob_fn, local_fn, container_url, forced)
     out <- f(local_fn, ...)
     file.remove(local_fn)
     out
@@ -87,11 +88,12 @@ read_blob_using <- function(blob_fn, container_url, f, ...) {
 #' Read blob data file
 #'
 #' Read a CSV/Excel file from the blob
-#' @name read_blob
+#' @name read_blob_data
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param forced Overwrite local version
 #' @export
-read_blob_data <- function(blob_fn, container_url, ...) {
+read_blob_data <- function(blob_fn, container_url, forced = FALSE, ...) {
     extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
     if (extension == ".csv") {
         f <- read.csv

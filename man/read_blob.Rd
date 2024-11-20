@@ -2,11 +2,8 @@
 % Please edit documentation in R/keeper.R
 \name{read_blob}
 \alias{read_blob}
-\alias{read_blob_data}
-\title{Read blob data file}
+\title{DEPRECATED - Read blob data file}
 \usage{
-read_blob_data(blob_fn, container_url, ...)
-
 read_blob(blob_fn, container_url, sheet = NULL, ...)
 }
 \arguments{
@@ -17,7 +14,5 @@ read_blob(blob_fn, container_url, sheet = NULL, ...)
 \item{sheet}{Sheet name for Excel}
 }
 \description{
-Read a CSV/Excel file from the blob
-
 DEPRECATED - Read a CSV/Excel file from the blob
 }
