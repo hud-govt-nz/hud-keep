@@ -110,31 +110,6 @@ read_blob_data <- function(blob_fn, container_url, forced = FALSE, ...) {
     read_blob_using(blob_fn, container_url, f, ...)
 }
 
-#' DEPRECATED - Read blob data file
-#'
-#' DEPRECATED - Read a CSV/Excel file from the blob
-#' @name read_blob
-#' @param blob_fn Blob filename (including path)
-#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param sheet Sheet name for Excel
-#' @export
-read_blob <- function(blob_fn, container_url, sheet = NULL, ...) {
-    warning("DEPRECATED - use read_blob_data() instead.")
-    extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
-    if (extension == ".csv") {
-        read_blob_using(blob_fn, container_url, read.csv, ...)
-    }
-    else if (extension == ".xls" || extension == ".xlsx") {
-        read_blob_using(blob_fn, container_url, readxl::read_excel, sheet = sheet, ...)
-    }
-    else if (extension == ".rds") {
-        read_blob_using(blob_fn, container_url, read_rds, ...)
-    }
-    else {
-        stop("I don't know how to read '", extension, "' files!")
-    }
-}
-
 #' List stored
 #'
 #' List all the files stored in the blob.
