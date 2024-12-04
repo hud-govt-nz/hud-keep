@@ -227,6 +227,7 @@ batch_write_table <- function(targ_df,
     db_count <- DBI::dbGetQuery(conn, stringr::str_glue("SELECT COUNT(*) FROM {table_name}"))
     if (db_count == nrow(targ_df)) {
         message(stringr::str_glue("{db_count} rows written to {table_name}."))
+        return(db_count)
     } else {
         stop(stringr::str_glue("{nrow(targ_df)} rows expected, but there are {db_count} rows in {table_name}!"))
     }
