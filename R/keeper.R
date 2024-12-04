@@ -203,16 +203,23 @@ batch_write_table <- function(targ_df,
                               driver = "{ODBC Driver 18 for SQL Server}",
                               batch_size = 100000) {
     message(stringr::str_glue("Writing {nrow(targ_df)} rows to {table_name}..."))
-    conn <- db_connect(database, server, driver)
-  
+    conn <- hud.keep::db_connect(database, server, driver)
+
+    # Structure name as Id object
+    table_id <-
+        table_name %>%
+        str_replace_all("[\\[\\]]", "") %>%
+        DBI::dbUnquoteIdentifier(conn, .) %>%
+        .[[1]]
+
     # Load data in batches
     for (i in seq(1, nrow(targ_df), batch_size)) {
         j <- min(i - 1 + batch_size, nrow(targ_df)) %>% as.integer()
         message(stringr::str_glue("Writing rows {i} to {j}..."))
         if (i == 1) {
-            DBI::dbWriteTable(conn, table_name, targ_df[i:j,], overwrite = TRUE)
+            DBI::dbWriteTable(conn, table_id, targ_df[i:j,], overwrite = TRUE)
         } else {
-            DBI::dbWriteTable(conn, table_name, targ_df[i:j,], append = TRUE)
+            DBI::dbWriteTable(conn, table_id, targ_df[i:j,], append = TRUE)
         }
     }
 
@@ -224,7 +231,6 @@ batch_write_table <- function(targ_df,
         stop(stringr::str_glue("{nrow(targ_df)} rows expected, but there are {db_count} rows in {table_name}!"))
     }
 }
-
 
 #===============#
 #   Utilities   #
