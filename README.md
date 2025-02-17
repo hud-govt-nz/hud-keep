@@ -28,7 +28,7 @@ x <- read_csv("test-local.csv")
 file.remove("test-local.csv") # For larger files, you might want to keep the local version to avoid having to download every time
 
 # Or use the convenience function, which does all the above
-x <- hud.keep::read_blob("test.csv", CONTAINER_URL)
+x <- hud.keep::read_blob_data("test.csv", CONTAINER_URL)
 ```
 
 ### Database
