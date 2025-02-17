@@ -76,9 +76,12 @@ src_blob_fn <- "regional-workforce/hlfs_20221101.xls"
 # store(src_local_fn, src_blob_fn, container_url)
 
 # Option 1: Read the file directly, read_blob can handle CSV and Excel (you'll need to name the sheet)
-hlfs <- read_blob(src_blob_fn, CONTAINER_URL, sheet = "Sheet1")
+hlfs <- read_blob_data(src_blob_fn, CONTAINER_URL, sheet = "Sheet1")
 
-# Option 2: Save the file locally, then read
+# Option 2: Read the file directly, read_blob can handle CSV and Excel (you'll need to name the sheet)
+hlfs <- read_blob_using(src_blob_fn, CONTAINER_URL, read_excel, sheet = "Sheet1")
+
+# Option 3: Save the file locally, then read
 # You might want this for larger file that you don't want to repeatedly download, or if the reading is not straightforward
 retrieve(src_blob_fn, src_local_fn, container_url)
 hlfs <- read_excel(src_local_fn, sheet = "Sheet1")
