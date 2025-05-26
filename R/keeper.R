@@ -30,6 +30,25 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
     }
 }
 
+#' Store folder
+#'
+#' Recursively store everything inside a folder in the blob.
+#' @name store_folder
+#' @param local_path Local folder (e.g. "outputs/20250101")
+#' @param blob_path Blob path where the contents of the local folder will be uploaded to (e.g. "project_name/outputs/20250101")
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param forced Overwrite blob version
+#' @export
+store_folder <- function(local_path, blob_path, container_url, forced = FALSE) {
+    message("Uploading folder ", local_path, "...")
+    file_list <- list.files(local_path, full.names = FALSE, recursive = TRUE)
+    for (fn in file_list) {
+        local_fn <- str_glue("{local_path}/{fn}")
+        blob_fn <- str_glue("{blob_path}/{fn}")
+        store(local_fn, blob_fn, container_url, forced = forced)
+    }
+}
+
 #' Retrive
 #'
 #' Retrives a file from the blob and save it locally.
