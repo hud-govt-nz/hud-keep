@@ -8,7 +8,7 @@
 #' @param forced Overwrite blob version
 #' @export
 store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
-    message("Storing ", local_fn, " as ", blob_fn, " ...")
+    message("Storing ", local_fn, " as ", blob_fn, "...")
     cont <- get_container(container_url)
     if (AzureStor::blob_exists(cont, blob_fn) & !forced) {
         l_props <- local_props(local_fn)
@@ -21,8 +21,7 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
                  "last modified ", l_props$mtime, ") doesn't match ",
                  "blob file (", b_props$size, " bytes, ",
                  "last modified ", b_props$mtime, ")! ",
-                 "\nUse 'forced=TRUE' to overwrite."
-            )
+                 "\nUse 'forced=TRUE' to overwrite.")
         }
     }
     else {
@@ -41,7 +40,7 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
 #' @param forced Overwrite local version
 #' @export
 retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
-    message("Retrieving ", local_fn, " from ", blob_fn, " ...")
+    message("Retrieving ", local_fn, " from ", blob_fn, "...")
     cont <- get_container(container_url)
     if (file.exists(local_fn) & !forced) {
         l_props <- local_props(local_fn)
@@ -58,8 +57,7 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
                  "last modified ", l_props$mtime, ") doesn't match ",
                  "blob file (", b_props$size, " bytes, ",
                  "last modified ", b_props$mtime, ")! ",
-                 "\nUse 'forced=TRUE' to overwrite."
-            )
+                 "\nUse 'forced=TRUE' to overwrite.")
         }
     }
     else {
@@ -82,7 +80,7 @@ read_blob_using <- function(blob_fn, container_url, f, forced = FALSE, ...) {
     retrieve(blob_fn, local_fn, container_url, forced)
     out <- f(local_fn, ...)
     file.remove(local_fn)
-    out
+    return(out)
 }
 
 #' Read blob data file
@@ -107,7 +105,8 @@ read_blob_data <- function(blob_fn, container_url, forced = FALSE, ...) {
     else {
         stop("I don't know how to read '", extension, "' files!")
     }
-    read_blob_using(blob_fn, container_url, f, ...)
+    blob_df <- read_blob_using(blob_fn, container_url, f, ...)
+    return(blob_df)
 }
 
 #' List stored
@@ -119,7 +118,8 @@ read_blob_data <- function(blob_fn, container_url, forced = FALSE, ...) {
 #' @export
 list_stored <- function(blob_starts_with, container_url) {
     cont <- get_container(container_url)
-    AzureStor::list_blobs(cont, prefix = blob_starts_with)
+    file_list <- AzureStor::list_blobs(cont, prefix = blob_starts_with)
+    return(file_list)
 }
 
 #' Find latest
@@ -140,13 +140,12 @@ list_stored <- function(blob_starts_with, container_url) {
 #' @export
 find_latest <- function(blob_pattern, container_url, prefix_filter = NULL) {
     cont <- get_container(container_url)
-    files <- AzureStor::list_blobs(cont, prefix = prefix_filter, info = "name") # Using a prefix_filter will speed things up
-    matches <- files[grepl(blob_pattern, files)]
+    file_list <- AzureStor::list_blobs(cont, prefix = prefix_filter, info = "name") # Using a prefix_filter will speed things up
+    matches <- file_list[grepl(blob_pattern, file_list)]
     if (length(matches) == 0) stop("No matches for '", blob_pattern, "' in '", container_url, "/", prefix_filter, "'!")
     latest <- tail(sort(matches), 1)
-    latest
+    return(latest)
 }
-
 
 #' Connect to a HUD database
 #'
@@ -175,14 +174,15 @@ db_connect <- function(database = "property",
             auth_type = auth_type)
 
     message("Connecting to '", database, "' on '", server ,"'...")
-    DBI::dbConnect(
-        odbc::odbc(),
-        Database = database,
-        Server = server,
-        Driver = driver,
-        attributes = list("azure_token" = token$credentials$access_token))
+    conn <-
+        DBI::dbConnect(
+            odbc::odbc(),
+            Database = database,
+            Server = server,
+            Driver = driver,
+            attributes = list("azure_token" = token$credentials$access_token))
+    return(conn)
 }
-
 
 #' Write to table in batches
 #'
@@ -203,7 +203,7 @@ batch_write_table <- function(targ_df,
                               driver = "{ODBC Driver 18 for SQL Server}",
                               batch_size = 100000) {
     message(stringr::str_glue("Writing {nrow(targ_df)} rows to {table_name}..."))
-    conn <- hud.keep::db_connect(database, server, driver)
+    conn <- db_connect(database, server, driver)
 
     # Structure name as Id object
     table_id <-
@@ -240,7 +240,8 @@ hex2base64 <- function(hex_str) {
     hex <- sapply(seq(1, nchar(hex_str), by = 2),
                   function(x) substr(hex_str, x, x + 1))
     raw <- as.raw(strtoi(hex, 16L))
-    base64enc::base64encode(raw)
+    out <- base64enc::base64encode(raw)
+    return(out)
 }
 
 local_props <- function (fn) {
@@ -248,16 +249,20 @@ local_props <- function (fn) {
         stop(paste0(fn, " not found!"))
     }
     props <- file.info(fn)
-    list(md5_hash = hex2base64(tools::md5sum(fn)),
-         size = props["size"][[1]],
-         mtime = lubridate::as_datetime(props["mtime"][[1]]))
+    prop_list <- list(
+        md5_hash = hex2base64(tools::md5sum(fn)),
+        size = props["size"][[1]],
+        mtime = lubridate::as_datetime(props["mtime"][[1]]))
+    return(prop_list)
 }
 
 blob_props <- function(blob_fn, cont) {
     props <- AzureStor::get_storage_properties(cont, blob_fn)
-    list(md5_hash = props["content-md5"][[1]],
-         size = props["content-length"][[1]],
-         mtime = lubridate::dmy_hms(props["last-modified"][[1]]))
+    prop_list <- list(
+        md5_hash = props["content-md5"][[1]],
+        size = props["content-length"][[1]],
+        mtime = lubridate::dmy_hms(props["last-modified"][[1]]))
+    return(prop_list)
 }
 
 get_container <- function(container_url) {
@@ -286,5 +291,6 @@ get_container <- function(container_url) {
             auth_type = auth_type)
 
     endp_key <- AzureStor::storage_endpoint(resource, token = token)
-    AzureStor::storage_container(endp_key, container)
+    cont <- AzureStor::storage_container(endp_key, container)
+    return(cont)
 }
