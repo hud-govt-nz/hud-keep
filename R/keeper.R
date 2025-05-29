@@ -30,6 +30,23 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
     }
 }
 
+#' Store data
+#'
+#' Stores a dataframe or tibble in the blob.
+#' @name store_data
+#' @param x Dataframe or tibble
+#' @param blob_fn Blob filename (including path)
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param file_format Format for saving the file
+#' @param forced Overwrite blob version
+#' @export
+store_data <- function(x, blob_fn, container_url, f = saveRDS, forced = FALSE) {
+    message("Storing data as ", blob_fn, "...")
+    local_fn <- tempfile()
+    f(x, local_fn) # Save file using the provided function
+    store(local_fn, blob_fn, container_url, forced)
+}
+
 #' Store folder
 #'
 #' Recursively store everything inside a folder in the blob.
