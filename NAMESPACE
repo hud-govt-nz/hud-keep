@@ -3,6 +3,8 @@
 export(batch_write_table)
 export(db_connect)
 export(find_latest)
+export(get_query)
+export(get_spatial_query)
 export(list_stored)
 export(read_blob_data)
 export(read_blob_using)

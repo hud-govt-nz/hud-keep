@@ -20,4 +20,5 @@ Imports:
   base64enc,
   httpuv,
   odbc,
+  sf,
   DBI
