@@ -60,8 +60,8 @@ store_folder <- function(local_path, blob_path, container_url, forced = FALSE) {
     message("Uploading folder ", local_path, "...")
     file_list <- list.files(local_path, full.names = FALSE, recursive = TRUE)
     for (fn in file_list) {
-        local_fn <- str_glue("{local_path}/{fn}")
-        blob_fn <- str_glue("{blob_path}/{fn}")
+        local_fn <- stringr::str_glue("{local_path}/{fn}")
+        blob_fn <- stringr::str_glue("{blob_path}/{fn}")
         store(local_fn, blob_fn, container_url, forced = forced)
     }
 }
