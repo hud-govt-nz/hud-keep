@@ -215,6 +215,12 @@ blob_props <- function(blob_fn, cont) {
     return(prop_list)
 }
 
+#' Get container
+#'
+#' Performs authentication and obtains blob container object.
+#' @name get_container
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @export
 get_container <- function(container_url) {
     matches <- stringr::str_match_all(container_url, "(https://.*)/([^\\?]+)\\??(.+)?")[[1]]
     resource <- matches[2]
