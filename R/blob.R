@@ -102,48 +102,48 @@ retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
     }
 }
 
-#' Read blob file using custom function
-#'
-#' Read a file from the blob using custom function
-#' @name read_blob_using
-#' @param blob_fn Blob filename (including path)
-#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param f Custom function
-#' @param forced Overwrite local version
-#' @export
-read_blob_using <- function(blob_fn, container_url, f, forced = FALSE, ...) {
-    local_fn <- paste0("temp_", stringr::str_replace_all(blob_fn, "/", "_"))
-    retrieve(blob_fn, local_fn, container_url, forced)
-    out <- f(local_fn, ...)
-    file.remove(local_fn)
-    return(out)
-}
-
 #' Read blob data file
 #'
 #' Read a CSV/Excel file from the blob
 #' @name read_blob_data
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param forced Overwrite local version
+#' @param f Custom function (leave empty to auto-select based on file extension)
+#' @param ... Additional parameters for custom function
 #' @export
-read_blob_data <- function(blob_fn, container_url, forced = FALSE, ...) {
-    extension <- stringr::str_extract(blob_fn, "\\.\\w+$") %>% tolower()
-    if (extension == ".csv") {
-        f <- read.csv
-    }
-    else if (extension == ".xls" || extension == ".xlsx") {
+read_blob_data <- function(blob_fn, container_url, f = NA, ...) {
+    extension <- tolower(stringr::str_extract(blob_fn, "\\.\\w+$"))
+    if (!is.na(f)) {
+        f <- f
+    } else if (extension == ".rds") {
+        f <- readr::read_rds
+    } else if (extension == ".csv") {
+        f <- readr::read_csv
+    } else if (extension == ".tsv") {
+        f <- readr::read_tsv
+    } else if (extension == ".xls" || extension == ".xlsx") {
         f <- readxl::read_excel
-    }
-    else if (extension == ".rds") {
-        f <- read_rds
-    }
-    else {
+    } else {
         stop("I don't know how to read '", extension, "' files!")
     }
-    blob_df <- read_blob_using(blob_fn, container_url, f, ...)
+
+    local_fn <- tempfile()
+    retrieve(blob_fn, local_fn, container_url)
+    blob_df <- f(local_fn, ...)
+    file.remove(local_fn)
     return(blob_df)
 }
+
+#' [DEPRECATED] Read blob file using custom function
+#'
+#' Use read_blob_data() instead
+#' @name read_blob_using
+#' @param blob_fn Blob filename (including path)
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
+#' @param f Custom function
+#' @param ... Additional parameters for custom function
+#' @export
+read_blob_using <- read_blob_data
 
 #' List stored
 #'
