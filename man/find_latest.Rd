@@ -4,14 +4,14 @@
 \alias{find_latest}
 \title{Find latest}
 \usage{
-find_latest(blob_pattern, container_url, dir)
+find_latest(blob_pattern, dir, container_url)
 }
 \arguments{
 \item{blob_pattern}{Pattern to match for (e.g. "ea-icp-grab.csv")}
 
-\item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
-
 \item{dir}{Base path to search in (e.g. "hmu-bot")}
+
+\item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 }
 \description{
 Finds the latest version of a file stored on the blob. The last file,

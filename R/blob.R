@@ -171,10 +171,10 @@ list_stored <- function(blob_starts_with, container_url) {
 #'
 #' @name find_latest
 #' @param blob_pattern Pattern to match for (e.g. "ea-icp-grab.csv")
-#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
 #' @param dir Base path to search in (e.g. "hmu-bot")
+#' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
 #' @export
-find_latest <- function(blob_pattern, container_url, dir) {
+find_latest <- function(blob_pattern, dir, container_url) {
     cont <- get_container(container_url)
     file_list <- AzureStor::list_blobs(cont, dir, info = "name") # Using a prefix_filter will speed things up
     matches <- file_list[grepl(blob_pattern, file_list)]
