@@ -4,7 +4,7 @@
 \alias{retrieve}
 \title{Retrive}
 \usage{
-retrieve(blob_fn, local_fn, container_url, forced = FALSE)
+retrieve(blob_fn, local_fn, container_url, update = TRUE, forced = FALSE)
 }
 \arguments{
 \item{blob_fn}{Blob filename (including path)}
@@ -13,7 +13,9 @@ retrieve(blob_fn, local_fn, container_url, forced = FALSE)
 
 \item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
-\item{forced}{Overwrite local version}
+\item{update}{Update the local version if the blob version is newer}
+
+\item{forced}{Overwrite local version no matter what}
 }
 \description{
 Retrives a file from the blob and save it locally.

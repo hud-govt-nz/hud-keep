@@ -5,29 +5,30 @@
 #' @param local_fn Local filename
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param forced Overwrite blob version
+#' @param update Update the blob version if the local version is newer
+#' @param forced Overwrite blob version no matter what
 #' @export
-store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
+store <- function(local_fn, blob_fn, container_url, update = TRUE, forced = FALSE) {
     message("Storing ", local_fn, " as ", blob_fn, "...")
     cont <- get_container(container_url)
-    if (AzureStor::blob_exists(cont, blob_fn) & !forced) {
+    if (!forced & AzureStor::blob_exists(cont, blob_fn)) {
         l_props <- local_props(local_fn)
         b_props <- blob_props(blob_fn, cont)
-        if (b_props$md5_hash == l_props$md5_hash) {
-            message("File is already stored and the blob hash matches the local file.")
-        }
-        else {
-            stop("Local file (", l_props$size, " bytes, ",
-                 "last modified ", l_props$mtime, ") doesn't match ",
-                 "blob file (", b_props$size, " bytes, ",
-                 "last modified ", b_props$mtime, ")! ",
-                 "\nUse 'forced=TRUE' to overwrite.")
+        if (l_props$md5_hash == b_props$md5_hash) {
+            return(local_fn)
+        } else if (l_props$mtime < b_props$mtime) {
+            stop(
+                "Local file is older (last modified ", l_props$mtime, ") ",
+                "than blob file (", b_props$mtime, "). ",
+                "\nUse 'forced=TRUE' to overwrite.")
+        } else if (!update) {
+            stop(
+                "Blob file already exists (last modified", b_props$mtime, ") ",
+                "and you've set update=FALSE.")
         }
     }
-    else {
-        AzureStor::upload_blob(cont, local_fn, blob_fn, put_md5 = TRUE)
-        return(local_fn)
-    }
+    AzureStor::upload_blob(cont, local_fn, blob_fn, put_md5 = TRUE)
+    return(local_fn)
 }
 
 #' Store data
@@ -38,13 +39,14 @@ store <- function(local_fn, blob_fn, container_url, forced = FALSE) {
 #' @param blob_fn Blob filename (including path)
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
 #' @param file_format Format for saving the file
-#' @param forced Overwrite blob version
+#' @param update Update the blob version if the local version is newer
+#' @param forced Overwrite blob version no matter what
 #' @export
-store_data <- function(x, blob_fn, container_url, f = saveRDS, forced = FALSE) {
+store_data <- function(x, blob_fn, container_url, f = saveRDS, update = TRUE, forced = FALSE) {
     message("Storing data as ", blob_fn, "...")
     local_fn <- tempfile()
     f(x, local_fn) # Save file using the provided function
-    store(local_fn, blob_fn, container_url, forced)
+    store(local_fn, blob_fn, container_url, update, forced)
 }
 
 #' Store folder
@@ -54,15 +56,16 @@ store_data <- function(x, blob_fn, container_url, f = saveRDS, forced = FALSE) {
 #' @param local_path Local folder (e.g. "outputs/20250101")
 #' @param blob_path Blob path where the contents of the local folder will be uploaded to (e.g. "project_name/outputs/20250101")
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param forced Overwrite blob version
+#' @param update Update the blob version if the local version is newer
+#' @param forced Overwrite blob version no matter what
 #' @export
-store_folder <- function(local_path, blob_path, container_url, forced = FALSE) {
+store_folder <- function(local_path, blob_path, container_url, update = TRUE, forced = FALSE) {
     message("Uploading folder ", local_path, "...")
     file_list <- list.files(local_path, full.names = FALSE, recursive = TRUE)
     for (fn in file_list) {
-        local_fn <- stringr::str_glue("{local_path}/{fn}")
+        local_fn <- file.path(local_path, fn)
         blob_fn <- stringr::str_glue("{blob_path}/{fn}")
-        store(local_fn, blob_fn, container_url, forced = forced)
+        store(local_fn, blob_fn, container_url, update, forced)
     }
 }
 
@@ -73,34 +76,31 @@ store_folder <- function(local_path, blob_path, container_url, forced = FALSE) {
 #' @param blob_fn Blob filename (including path)
 #' @param local_fn Local filename
 #' @param container_url Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")
-#' @param forced Overwrite local version
+#' @param update Update the local version if the blob version is newer
+#' @param forced Overwrite local version no matter what
 #' @export
-retrieve <- function(blob_fn, local_fn, container_url, forced = FALSE) {
+retrieve <- function(blob_fn, local_fn, container_url, update = TRUE, forced = FALSE) {
     message("Retrieving ", local_fn, " from ", blob_fn, "...")
     cont <- get_container(container_url)
-    if (file.exists(local_fn) & !forced) {
+    if (!forced & file.exists(local_fn)) {
         l_props <- local_props(local_fn)
         b_props <- blob_props(blob_fn, cont)
-        if (is.null(b_props$md5_hash)) {
-            message("Blob does not have a hash, no check possible.")
-            AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
-        }
-        else if (b_props$md5_hash == l_props$md5_hash) {
-            message("Local file already exists and matches the blob hash.")
-        }
-        else {
-            stop("Local file (", l_props$size, " bytes, ",
-                 "last modified ", l_props$mtime, ") doesn't match ",
-                 "blob file (", b_props$size, " bytes, ",
-                 "last modified ", b_props$mtime, ")! ",
-                 "\nUse 'forced=TRUE' to overwrite.")
+        if (!is.null(b_props$md5_hash) & b_props$md5_hash == l_props$md5_hash) {
+            return(local_fn)
+        } else if (b_props$mtime < l_props$mtime) {
+            stop(
+                "Blob file is older (last modified ", b_props$mtime, ") ",
+                "than local file (", l_props$mtime, "). ",
+                "\nUse 'forced=TRUE' to overwrite.")
+        } else if (!update) {
+            stop(
+                "Local file already exists (last modified", l_props$mtime, ") ",
+                "and you've set update=FALSE.")
         }
     }
-    else {
-        AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
-        return(local_fn)
+    AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
+    return(local_fn)
     }
-}
 
 #' Read blob data file
 #'

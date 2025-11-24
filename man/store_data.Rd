@@ -4,7 +4,14 @@
 \alias{store_data}
 \title{Store data}
 \usage{
-store_data(x, blob_fn, container_url, f = saveRDS, forced = FALSE)
+store_data(
+  x,
+  blob_fn,
+  container_url,
+  f = saveRDS,
+  update = TRUE,
+  forced = FALSE
+)
 }
 \arguments{
 \item{x}{Dataframe or tibble}
@@ -13,7 +20,9 @@ store_data(x, blob_fn, container_url, f = saveRDS, forced = FALSE)
 
 \item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
-\item{forced}{Overwrite blob version}
+\item{update}{Update the blob version if the local version is newer}
+
+\item{forced}{Overwrite blob version no matter what}
 
 \item{file_format}{Format for saving the file}
 }

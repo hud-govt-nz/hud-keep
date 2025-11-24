@@ -4,7 +4,13 @@
 \alias{store_folder}
 \title{Store folder}
 \usage{
-store_folder(local_path, blob_path, container_url, forced = FALSE)
+store_folder(
+  local_path,
+  blob_path,
+  container_url,
+  update = TRUE,
+  forced = FALSE
+)
 }
 \arguments{
 \item{local_path}{Local folder (e.g. "outputs/20250101")}
@@ -13,7 +19,9 @@ store_folder(local_path, blob_path, container_url, forced = FALSE)
 
 \item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
-\item{forced}{Overwrite blob version}
+\item{update}{Update the blob version if the local version is newer}
+
+\item{forced}{Overwrite blob version no matter what}
 }
 \description{
 Recursively store everything inside a folder in the blob.

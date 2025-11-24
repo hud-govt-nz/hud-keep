@@ -4,7 +4,7 @@
 \alias{store}
 \title{Store}
 \usage{
-store(local_fn, blob_fn, container_url, forced = FALSE)
+store(local_fn, blob_fn, container_url, update = TRUE, forced = FALSE)
 }
 \arguments{
 \item{local_fn}{Local filename}
@@ -13,7 +13,9 @@ store(local_fn, blob_fn, container_url, forced = FALSE)
 
 \item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
-\item{forced}{Overwrite blob version}
+\item{update}{Update the blob version if the local version is newer}
+
+\item{forced}{Overwrite blob version no matter what}
 }
 \description{
 Stores a local file in the blob.
