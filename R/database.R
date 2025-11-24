@@ -61,7 +61,7 @@ get_query <- function(query, ...) {
 #' @param driver Driver string (optional)
 #' @export
 get_spatial_query <- function(query, geometry_column = "geom", ...) {
-    conn <- hud.keep::db_connect(...)
+    conn <- db_connect(...)
     out <-
         sf::st_read(conn, crs = 4167, geometry_column = geometry_column, query = query) %>%
         sf::st_make_valid() %>%

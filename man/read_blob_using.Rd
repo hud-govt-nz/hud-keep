@@ -2,9 +2,9 @@
 % Please edit documentation in R/blob.R
 \name{read_blob_using}
 \alias{read_blob_using}
-\title{Read blob file using custom function}
+\title{\link{DEPRECATED} Read blob file using custom function}
 \usage{
-read_blob_using(blob_fn, container_url, f, forced = FALSE, ...)
+read_blob_using(blob_fn, container_url, f = NA, ...)
 }
 \arguments{
 \item{blob_fn}{Blob filename (including path)}
@@ -13,8 +13,8 @@ read_blob_using(blob_fn, container_url, f, forced = FALSE, ...)
 
 \item{f}{Custom function}
 
-\item{forced}{Overwrite local version}
+\item{...}{Additional parameters for custom function}
 }
 \description{
-Read a file from the blob using custom function
+Use read_blob_data() instead
 }

@@ -4,14 +4,16 @@
 \alias{read_blob_data}
 \title{Read blob data file}
 \usage{
-read_blob_data(blob_fn, container_url, forced = FALSE, ...)
+read_blob_data(blob_fn, container_url, f = NA, ...)
 }
 \arguments{
 \item{blob_fn}{Blob filename (including path)}
 
 \item{container_url}{Azure container URL (e.g. "https://dlprojectsdataprod.blob.core.windows.net/bot-outputs")}
 
-\item{forced}{Overwrite local version}
+\item{f}{Custom function (leave empty to auto-select based on file extension)}
+
+\item{...}{Additional parameters for custom function}
 }
 \description{
 Read a CSV/Excel file from the blob

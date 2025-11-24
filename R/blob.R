@@ -158,6 +158,22 @@ list_stored <- function(blob_starts_with, container_url) {
     return(file_list)
 }
 
+#' List local
+#'
+#' List all the files stored within a local folder, with hashes.
+#' @name list_local
+#' @param trg_path Path
+#' @param full.names Whether to include source path in the file names
+#' @export
+list_local <- function(trg_path, full.names = FALSE) {
+    full_names <- list.files(trg_path, recursive = TRUE, full.names = TRUE)
+    display_names <- list.files(trg_path, recursive = TRUE, full.names = full.names)
+    file_props <- purrr::map(full_names, ~ dplyr::as_tibble(local_props(.)))
+    dplyr::as_tibble(cbind(
+        list(file_name = display_names),
+        do.call(rbind, file_props)))
+}
+
 #' Find latest
 #'
 #' Finds the latest version of a file stored on the blob. The last file,
