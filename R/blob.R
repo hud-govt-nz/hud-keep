@@ -133,7 +133,7 @@ retrieve <- function(blob_fn, local_fn, container_url, update = TRUE, forced = F
     }
     AzureStor::download_blob(cont, blob_fn, local_fn, overwrite = TRUE)
     return(local_fn)
-    }
+}
 
 #' Read blob data file
 #'
