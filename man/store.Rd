@@ -4,7 +4,14 @@
 \alias{store}
 \title{Store}
 \usage{
-store(local_fn, blob_fn, container_url, update = TRUE, forced = FALSE)
+store(
+  local_fn,
+  blob_fn,
+  container_url,
+  update = TRUE,
+  forced = FALSE,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{local_fn}{Local filename}

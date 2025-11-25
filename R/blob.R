@@ -8,8 +8,8 @@
 #' @param update Update the blob version if the local version is newer
 #' @param forced Overwrite blob version no matter what
 #' @export
-store <- function(local_fn, blob_fn, container_url, update = TRUE, forced = FALSE) {
-    message("Storing ", local_fn, " as ", blob_fn, "...")
+store <- function(local_fn, blob_fn, container_url, update = TRUE, forced = FALSE, quiet = FALSE) {
+    if (!quiet) message("Storing ", local_fn, " as ", blob_fn, "...")
     cont <- get_container(container_url)
     if (!forced & AzureStor::blob_exists(cont, blob_fn)) {
         l_props <- local_props(local_fn)
@@ -46,7 +46,7 @@ store_data <- function(x, blob_fn, container_url, f = saveRDS, update = TRUE, fo
     message("Storing data as ", blob_fn, "...")
     local_fn <- tempfile()
     f(x, local_fn) # Save file using the provided function
-    store(local_fn, blob_fn, container_url, update, forced)
+    store(local_fn, blob_fn, container_url, update, forced, quiet = TRUE)
 }
 
 #' Store folder
