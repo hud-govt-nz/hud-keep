@@ -60,13 +60,46 @@ store_data <- function(x, blob_fn, container_url, f = saveRDS, update = TRUE, fo
 #' @param forced Overwrite blob version no matter what
 #' @export
 store_folder <- function(local_path, blob_path, container_url, update = TRUE, forced = FALSE) {
-    message("Uploading folder ", local_path, "...")
-    file_list <- list.files(local_path, full.names = FALSE, recursive = TRUE)
-    for (fn in file_list) {
-        local_fn <- file.path(local_path, fn)
-        blob_fn <- stringr::str_glue("{blob_path}/{fn}")
-        store(local_fn, blob_fn, container_url, update, forced)
+    message("Uploading folder '", local_path, "' to '", blob_path, "'...")
+    blob_list <-
+        list_stored(blob_path, container_url) %>%
+        transmute(
+            file_name = str_replace(name, paste0(blob_path, "/"), ""),
+            md5_hash = `Content-MD5`,
+            size = size,
+            mtime = `Last-Modified`)
+
+    local_list <-
+        list_local(local_path) %>%
+        left_join(
+            blob_list,
+            by = "file_name",
+            relationship = "one-to-one",
+            suffix = c(".local", ".blob")) %>%
+        mutate(status = case_when(
+            is.na(mtime.blob) ~ "new",
+            md5_hash.local == md5_hash.blob ~ "unchanged",
+            mtime.local > mtime.blob ~ "updated",
+            TRUE ~ "error"))
+
+    if (!forced & any(local_list$status == "error")) {
+        print(local_list %>% filter(status == "error"))
+        stop(
+            "Some local files are older than blob files! ",
+            "\nUse 'forced=TRUE' to overwrite.")
+    } else if (!update & any(local_list$status  == "updated")) {
+        print(local_list %>% filter(status == "updated"))
+        stop(
+            "Some local files have been updated, ",
+            "but you've set update=FALSE.")
     }
+
+    target_list <- local_list %>% filter(status != "unchanged")
+    AzureStor::multiupload_blob(
+        get_container(container_url),
+        file.path(local_path, target_list$file_name),
+        file.path(blob_path, target_list$file_name),
+        put_md5 = TRUE)
 }
 
 #' Retrive
@@ -154,8 +187,8 @@ read_blob_using <- read_blob_data
 #' @export
 list_stored <- function(blob_starts_with, container_url) {
     cont <- get_container(container_url)
-    file_list <- AzureStor::list_blobs(cont, prefix = blob_starts_with)
-    return(file_list)
+    AzureStor::list_blobs(cont, prefix = blob_starts_with, info = "all") %>%
+        dplyr::as_tibble()
 }
 
 #' List local
