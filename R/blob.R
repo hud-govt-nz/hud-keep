@@ -82,6 +82,7 @@ store_folder <- function(local_path, blob_path, container_url, update = TRUE, fo
             mtime.local > mtime.blob ~ "updated",
             TRUE ~ "error"))
 
+    print(local_list %>% count(status))
     if (!forced & any(local_list$status == "error")) {
         print(local_list %>% filter(status == "error"))
         stop(
@@ -100,6 +101,7 @@ store_folder <- function(local_path, blob_path, container_url, update = TRUE, fo
         file.path(local_path, target_list$file_name),
         file.path(blob_path, target_list$file_name),
         put_md5 = TRUE)
+    message(nrow(target_list), " files uploaded.")
 }
 
 #' Retrive
