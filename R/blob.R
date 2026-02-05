@@ -189,8 +189,23 @@ read_blob_using <- read_blob_data
 #' @export
 list_stored <- function(blob_starts_with, container_url) {
     cont <- get_container(container_url)
-    AzureStor::list_blobs(cont, prefix = blob_starts_with, info = "all") %>%
+    blob_list <-
+        AzureStor::list_blobs(cont, prefix = blob_starts_with, info = "all") %>%
         dplyr::as_tibble()
+    # Create placeholder if required
+    if (nrow(blob_list) == 0) {
+        blob_list <- tibble(
+            name = character(),
+            size = numeric(),
+            isdir = logical(),
+            blobtype = character(),
+            `Creation-Time` = POSIXct(),
+            `Last-Modified` = POSIXct(),
+            `Content-Type` = character(),
+            `Content-MD5` = character(),
+        )
+    }
+    return(blob_list)
 }
 
 #' List local
