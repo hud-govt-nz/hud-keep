@@ -20,6 +20,5 @@ Imports:
   base64enc,
   httpuv,
   odbc,
-  sf,
   DBI
 Config/roxygen2/version: 8.0.0
