@@ -7,7 +7,8 @@
 db_connect(
   database = "property",
   server = "property.database.windows.net",
-  driver = "{ODBC Driver 18 for SQL Server}"
+  driver = "{ODBC Driver 18 for SQL Server}",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ db_connect(
 \item{server}{Server name (optional)}
 
 \item{driver}{Driver string (optional)}
+
+\item{verbose}{Show/hide messages}
 }
 \description{
 Handles all the Active Directory authentication and connects to database.

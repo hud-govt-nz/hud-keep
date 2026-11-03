@@ -5,10 +5,12 @@
 #' @param database Database name (optional)
 #' @param server Server name (optional)
 #' @param driver Driver string (optional)
+#' @param verbose Show/hide messages
 #' @export
 db_connect <- function(database = "property",
                        server = "property.database.windows.net",
-                       driver = "{ODBC Driver 18 for SQL Server}") {
+                       driver = "{ODBC Driver 18 for SQL Server}",
+                       verbose = TRUE) {
 
     # Use "device_code" on the cloud because we can't hook up to a browser
     if (grepl("azure", Sys.info()["release"])) {
@@ -17,21 +19,31 @@ db_connect <- function(database = "property",
         auth_type <- NULL
     }
 
-    token <-
+    # Decide whether to be verbose
+    live_tokens <- AzureAuth::list_azure_tokens()
+    if (verbose | length(live_tokens) == 0) {
+        message("Connecting to '", database, "' on '", server ,"'...")
+        suppressed_classes <- "placeholder" # Will not actually suppress anything
+    } else {
+        suppressed_classes <- "message"
+    }
+
+    token <- suppressMessages(
         AzureAuth::get_azure_token(
             resource = "https://database.windows.net",
             tenant = "9e9b3020-3d38-48a6-9064-373bc7b156dc", # "hud.govt.nz" tenancy
             app = "04b07795-8ddb-461a-bbee-02f9e1bf7b46", # "Offline Access" app
-            auth_type = auth_type)
+            auth_type = auth_type),
+        classes = suppressed_classes)
 
-    message("Connecting to '", database, "' on '", server ,"'...")
-    conn <-
+    conn <- suppressMessages(
         DBI::dbConnect(
             odbc::odbc(),
             Database = database,
             Server = server,
             Driver = driver,
-            attributes = list("azure_token" = token$credentials$access_token))
+            attributes = list("azure_token" = token$credentials$access_token)),
+        classes = suppressed_classes)
     return(conn)
 }
 
